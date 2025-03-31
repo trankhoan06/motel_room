@@ -7,6 +7,7 @@ import (
 	"log"
 	"main.go/component/middleware"
 	jwt2 "main.go/component/tokenprovider/jwt"
+	"main.go/modules/upload"
 	storage2 "main.go/modules/user/storage"
 	ginUser "main.go/modules/user/transport/gin"
 	"os"
@@ -27,14 +28,25 @@ func main() {
 	r.Use(middle.Recover())
 	configCORS := setupCors()
 	r.Use(cors.New(configCORS))
-
+	r.Static("/static", "./static")
 	u := r.Group("/user")
 	{
 		u.GET("/register", ginUser.Register(db))
 		u.GET("/login", ginUser.Login(db, jwtPrefix))
+		u.GET("/login_facebook", ginUser.LoginFacebook(db))
+		u.POST("/login_google", ginUser.LoginGoogle(db))
+		u.GET("/get_profile", middle.RequestAuthorize(), ginUser.GetProfile(db))
+		u.GET("/forgot_password", ginUser.ForgotPassword(db))
 		u.PATCH("/verify_code_email", ginUser.VerifyCodeEmail(db, jwtPrefix))
+		u.PATCH("/verify_forgot_password", ginUser.VerifyForgotPassword(db))
 		u.PATCH("/change_password", middle.RequestAuthorize(), ginUser.ChangePassword(db))
+		u.PATCH("/update_user", middle.RequestAuthorize(), ginUser.UpdateUser(db))
+		u.PATCH("/change_forgot_password", ginUser.ChangeForgotPassword(db))
 		u.POST("/create_verify_code_email", ginUser.CreateVerifyCodeEmail(db))
+	}
+	image := r.Group("/image")
+	{
+		image.POST("/upload", upload.UploadImage(db))
 	}
 	r.Run(":3000") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

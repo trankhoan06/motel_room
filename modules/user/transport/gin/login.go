@@ -23,7 +23,7 @@ func Login(db *gorm.DB, provider tokenprovider.TokenProvider) func(*gin.Context)
 		store := storage.NewSqlModel(db)
 		hash := common.NewSha256Hash()
 		business := biz.NewLoginBiz(store, provider, hash)
-		token, err := business.NewLogin(c.Request.Context(), &l, 24)
+		token, err := business.NewLogin(c.Request.Context(), &l, 24*30)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),

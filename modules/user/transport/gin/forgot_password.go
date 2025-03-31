@@ -9,20 +9,20 @@ import (
 	"net/http"
 )
 
-func CreateVerifyCodeEmail(db *gorm.DB) func(*gin.Context) {
+func ForgotPassword(db *gorm.DB) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		var verify model.VerifyAccountCode
-		if err := c.ShouldBindJSON(&verify); err != nil {
+		var forgot model.ForgotPassword
+		if err := c.ShouldBindJSON(&forgot); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		store := storage.NewSqlModel(db)
 		business := biz.NewUserCommonBiz(store)
-		createVerify, err := business.NewCreateVerifyCodeEmail(c.Request.Context(), &verify, 60)
+		verify, err := business.NewForgotPassword(c.Request.Context(), &forgot, 60)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"Status": true, "data": createVerify})
+		c.JSON(http.StatusOK, gin.H{"data": verify})
 	}
 }

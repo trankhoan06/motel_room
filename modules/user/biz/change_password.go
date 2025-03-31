@@ -3,10 +3,14 @@ package biz
 import (
 	"context"
 	"errors"
+	"main.go/common"
 	"main.go/modules/user/model"
 )
 
 func (biz *RegisterUserBiz) NewChangePassword(ctx context.Context, data *model.ChangePassword) error {
+	if data.Email == "" {
+		return common.ErrLogin
+	}
 	user, err := biz.store.FindUser(ctx, map[string]interface{}{"id": data.Id})
 	if err != nil {
 		return err

@@ -2,19 +2,20 @@ package biz
 
 import (
 	"context"
+	"errors"
 	"main.go/common"
 	emailSend "main.go/email"
 	"main.go/modules/user/model"
 	"time"
 )
 
-func (biz *UserCommonBiz) NewCreateVerifyCodeEmail(ctx context.Context, verify *model.VerifyAccountCode, expire int) (*model.VerifyToken, error) {
-	if verify.Email == "" {
+func (biz *UserCommonBiz) NewForgotPassword(ctx context.Context, data *model.ForgotPassword, expire int) (*model.VerifyToken, error) {
+	if data.Email == "" {
 		return nil, common.ErrEmailRequire
 	}
-	user, err := biz.store.FindUser(ctx, map[string]interface{}{"email": verify.Email})
+	user, err := biz.store.FindUser(ctx, map[string]interface{}{"email": data.Email})
 	if err != nil {
-		return nil, common.ErrEmailNoExist(err)
+		return nil, common.ErrEmailNoExist(errors.New("user don't exist"))
 	}
 	var verifyEmail model.CreateVerifyAccount
 	verifyEmail.UserId = user.Id
@@ -22,13 +23,13 @@ func (biz *UserCommonBiz) NewCreateVerifyCodeEmail(ctx context.Context, verify *
 	verifyEmail.Code = common.GenerateRandomCode()
 	now := time.Now().Add(-7 * time.Hour)
 	verifyEmail.Expire = now.Add(time.Duration(expire) * time.Second)
-	if err := biz.store.CreateCodeVerify(ctx, &verifyEmail); err != nil {
-		return nil, err
+	if err1 := biz.store.CreateCodeVerify(ctx, &verifyEmail); err1 != nil {
+		return nil, err1
 	}
-	emailSend.SendVerifyEmail(user.Email, verifyEmail.Code)
+	emailSend.SendForgotPassword(user.Email, verifyEmail.Code)
 	return &model.VerifyToken{
 		Token:   verifyEmail.Token,
-		Email:   verify.Email,
+		Email:   data.Email,
 		IsLogin: false,
 	}, nil
 }

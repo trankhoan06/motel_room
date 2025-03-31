@@ -9,6 +9,9 @@ import (
 )
 
 func (biz *LoginBiz) NewLogin(ctx context.Context, data *model.Login, expiry int) (tokenprovider.Token, error) {
+	if data.Email == "" {
+		return nil, common.ErrEmailRequire
+	}
 	user, err := biz.store.FindUser(ctx, map[string]interface{}{"email": data.Email})
 	if err != nil {
 		return nil, errors.New("email don't exist")

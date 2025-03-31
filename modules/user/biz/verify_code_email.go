@@ -9,11 +9,14 @@ import (
 )
 
 func (biz *LoginBiz) NewVerifyEmail(ctx context.Context, verify *model.VerifyAccountCode, expire int) (*tokenprovider.Token, error) {
+	if verify.Email == "" {
+		return nil, common.ErrEmailRequire
+	}
 	user, err := biz.store.FindUser(ctx, map[string]interface{}{"email": verify.Email})
 	if err != nil {
 		return nil, common.ErrEmailNoExist(err)
 	}
-	v, errVerify := biz.store.FindCodeVerify(ctx, map[string]interface{}{"user_id": user.Id, "is_verify_email": true})
+	v, errVerify := biz.store.FindCodeVerify(ctx, map[string]interface{}{"user_id": user.Id, "token": verify.Token})
 	if errVerify != nil {
 		return nil, err
 	}
@@ -24,7 +27,7 @@ func (biz *LoginBiz) NewVerifyEmail(ctx context.Context, verify *model.VerifyAcc
 	if v.Code != verify.Code {
 		return nil, common.ErrVerifyCode
 	}
-	if err := biz.store.UpdateVerifyCode(ctx, map[string]interface{}{"user_id": user.Id}); err != nil {
+	if err := biz.store.UpdateVerifyCode(ctx, map[string]interface{}{"user_id": user.Id}, map[string]interface{}{"verify": 1}); err != nil {
 		return nil, err
 	}
 	if err := biz.store.UpdateVerifyEmail(ctx, map[string]interface{}{"id": user.Id}); err != nil {
