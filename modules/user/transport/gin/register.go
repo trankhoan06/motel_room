@@ -20,10 +20,11 @@ func Register(db *gorm.DB) func(*gin.Context) {
 		store := storage2.NewSqlModel(db)
 		hash := common.NewSha256Hash()
 		business := biz.NewRegisterUserBiz(store, hash)
-		if err := business.NewRegister(ctx.Request.Context(), &data, 60); err != nil {
+		verify, err := business.NewRegister(ctx.Request.Context(), &data, 60)
+		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		ctx.JSON(http.StatusOK, gin.H{"email": data.Email, "data": true})
+		ctx.JSON(http.StatusOK, gin.H{"verify": verify, "data": true})
 	}
 }

@@ -13,7 +13,7 @@ type UserBiz interface {
 	DeletedUser(ctx context.Context, cond map[string]interface{}) error
 	CreateCodeVerify(ctx context.Context, data *model.CreateVerifyAccount) error
 	FindCodeVerify(ctx context.Context, cond map[string]interface{}) (*model.VerifyAccount, error)
-	UpdateVerifyCode(ctx context.Context, cond map[string]interface{}) error
+	UpdateVerifyCode(ctx context.Context, cond map[string]interface{}, update map[string]interface{}) error
 	UpdateVerifyEmail(ctx context.Context, cond map[string]interface{}) error
 	ChangePassword(ctx context.Context, id int, password string) error
 }
