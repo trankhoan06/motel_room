@@ -31,7 +31,7 @@ func (biz *RegisterUserBiz) NewRegister(ctx context.Context, data *model.Registe
 	if err := biz.store.CreateCodeVerify(ctx, &verifyEmail); err != nil {
 		fmt.Print(err)
 	}
-	emailSend.SendVerifyEmail(data.Email, verifyEmail.Code)
+	emailSend.SendVerifyEmail(data.Email, verifyEmail.Code, biz.cfg)
 	return &model.VerifyToken{
 		Token:   verifyEmail.Token,
 		Email:   data.Email,

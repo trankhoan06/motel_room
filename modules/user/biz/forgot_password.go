@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (biz *UserCommonBiz) NewForgotPassword(ctx context.Context, data *model.ForgotPassword, expire int) (*model.VerifyToken, error) {
+func (biz *SendEMailBiz) NewForgotPassword(ctx context.Context, data *model.ForgotPassword, expire int) (*model.VerifyToken, error) {
 	if data.Email == "" {
 		return nil, common.ErrEmailRequire
 	}
@@ -26,7 +26,7 @@ func (biz *UserCommonBiz) NewForgotPassword(ctx context.Context, data *model.For
 	if err1 := biz.store.CreateCodeVerify(ctx, &verifyEmail); err1 != nil {
 		return nil, err1
 	}
-	emailSend.SendForgotPassword(user.Email, verifyEmail.Code)
+	emailSend.SendForgotPassword(user.Email, verifyEmail.Code, biz.cfg)
 	return &model.VerifyToken{
 		Token:   verifyEmail.Token,
 		Email:   data.Email,

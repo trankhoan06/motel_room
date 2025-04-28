@@ -1,8 +1,11 @@
 package emailSend
 
-import "fmt"
+import (
+	"fmt"
+	"main.go/config"
+)
 
-func SendVerifyEmail(email string, code int) error {
+func SendVerifyEmail(email string, code int, cfg *config.Config) error {
 	sender := NewGmailSender()
 	title := "Verify Email"
 	content := fmt.Sprintf(`
@@ -10,6 +13,6 @@ func SendVerifyEmail(email string, code int) error {
 <p>Web send code: %d</p>
 `, code)
 	to := []string{email}
-	err := sender.SendEmail(title, content, to, nil, nil, nil)
+	err := sender.SendEmail(cfg, title, content, to, nil, nil, nil)
 	return err
 }

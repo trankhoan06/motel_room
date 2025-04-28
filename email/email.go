@@ -3,19 +3,18 @@ package emailSend
 import (
 	"fmt"
 	"github.com/jordan-wright/email"
+	"main.go/config"
 	"net/smtp"
 )
 
 const (
-	SenderEmailAccount  = "trankhoan06@gmail.com"
-	PassWordSenderEmail = "klptazdfrrcwvgfp"
-	NameSender          = "Web seller"
-	SmtpAuthorAddress   = "smtp.gmail.com"
-	SmtpSeverService    = "smtp.gmail.com:587"
+	SmtpAuthorAddress = "smtp.gmail.com"
+	SmtpSeverService  = "smtp.gmail.com:587"
 )
 
 type Sender interface {
 	SendEmail(
+		cfg *config.Config,
 		Title string,
 		Content string,
 		To []string,
@@ -25,19 +24,13 @@ type Sender interface {
 	) error
 }
 type GmailSender struct {
-	Name                   string
-	FromEmailAddress       string
-	FromEmailPasswordEmail string
 }
 
 func NewGmailSender() Sender {
-	return &GmailSender{
-		Name:                   NameSender,
-		FromEmailAddress:       SenderEmailAccount,
-		FromEmailPasswordEmail: PassWordSenderEmail,
-	}
+	return &GmailSender{}
 }
 func (sender *GmailSender) SendEmail(
+	cfg *config.Config,
 	Title string,
 	Content string,
 	To []string,
@@ -46,7 +39,7 @@ func (sender *GmailSender) SendEmail(
 	AttactFile []string,
 ) error {
 	e := email.NewEmail()
-	e.From = fmt.Sprintf("%s <%s>", NameSender, SenderEmailAccount)
+	e.From = fmt.Sprintf("%s <%s>", cfg.Email.EmailSenderName, cfg.Email.EmailSenderAddress)
 	e.To = To
 	e.Subject = Title
 	e.HTML = []byte(Content)
@@ -59,6 +52,6 @@ func (sender *GmailSender) SendEmail(
 		}
 
 	}
-	auPath := smtp.PlainAuth("", sender.FromEmailAddress, sender.FromEmailPasswordEmail, SmtpAuthorAddress)
+	auPath := smtp.PlainAuth("", cfg.Email.EmailSenderAddress, cfg.Email.EmailSenderPassword, SmtpAuthorAddress)
 	return e.Send(SmtpSeverService, auPath)
 }

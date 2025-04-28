@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"main.go/component/tokenprovider"
+	"main.go/config"
 	"main.go/modules/user/model"
 )
 
@@ -25,24 +26,35 @@ func NewUserCommonBiz(store UserBiz) *UserCommonBiz {
 	return &UserCommonBiz{store: store}
 }
 
+type SendEMailBiz struct {
+	store UserBiz
+	cfg   *config.Config
+}
+
+func NewSendEmailBiz(store UserBiz, cfg *config.Config) *SendEMailBiz {
+	return &SendEMailBiz{store: store, cfg: cfg}
+}
+
 type Hasher interface {
 	Hash(str string) string
 }
 type RegisterUserBiz struct {
 	store UserBiz
 	hash  Hasher
+	cfg   *config.Config
 }
 
-func NewRegisterUserBiz(store UserBiz, hash Hasher) *RegisterUserBiz {
-	return &RegisterUserBiz{store: store, hash: hash}
+func NewRegisterUserBiz(store UserBiz, hash Hasher, cfg *config.Config) *RegisterUserBiz {
+	return &RegisterUserBiz{store: store, hash: hash, cfg: cfg}
 }
 
 type LoginBiz struct {
 	store    UserBiz
 	provider tokenprovider.TokenProvider
 	hash     Hasher
+	cfg      *config.Config
 }
 
-func NewLoginBiz(store UserBiz, provider tokenprovider.TokenProvider, hash Hasher) *LoginBiz {
-	return &LoginBiz{store: store, provider: provider, hash: hash}
+func NewLoginBiz(store UserBiz, provider tokenprovider.TokenProvider, hash Hasher, cfg *config.Config) *LoginBiz {
+	return &LoginBiz{store: store, provider: provider, hash: hash, cfg: cfg}
 }

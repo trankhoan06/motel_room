@@ -2,26 +2,31 @@ package main
 
 import (
 	"github.com/gin-contrib/cors"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+	"github.com/gin-gonic/gin"
 	"log"
+	"main.go/checkRole"
 	"main.go/component/middleware"
 	jwt2 "main.go/component/tokenprovider/jwt"
+	"main.go/config"
+	ginFollow "main.go/modules/follower/transport/gin"
+	ginRent "main.go/modules/rent/transport/gin"
 	"main.go/modules/upload"
 	storage2 "main.go/modules/user/storage"
 	ginUser "main.go/modules/user/transport/gin"
-	"os"
-
-	"github.com/gin-gonic/gin"
+	ProviderMysql "main.go/provider/mysql"
 )
 
 func main() {
-	dsn := os.Getenv("DOMAIN")
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-	jwtPrefix := jwt2.NewJwtProvider(os.Getenv("PREFIX"), os.Getenv("SECRET"))
+	db, err := ProviderMysql.NewMysql(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	jwtPrefix := jwt2.NewJwtProvider(cfg.App.Prefix, cfg.App.Secret)
 	auth := storage2.NewSqlModel(db)
 	middle := middleware.NewModelMiddleware(auth, jwtPrefix)
 	r := gin.Default()
@@ -31,24 +36,51 @@ func main() {
 	r.Static("/static", "./static")
 	u := r.Group("/user")
 	{
-		u.GET("/register", ginUser.Register(db))
-		u.GET("/login", ginUser.Login(db, jwtPrefix))
+		u.GET("/register", ginUser.Register(db, cfg))
+		u.GET("/login", ginUser.Login(db, jwtPrefix, cfg))
 		u.GET("/login_facebook", ginUser.LoginFacebook(db))
 		u.POST("/login_google", ginUser.LoginGoogle(db))
 		u.GET("/get_profile", middle.RequestAuthorize(), ginUser.GetProfile(db))
-		u.GET("/forgot_password", ginUser.ForgotPassword(db))
-		u.PATCH("/verify_code_email", ginUser.VerifyCodeEmail(db, jwtPrefix))
+		u.GET("/forgot_password", ginUser.ForgotPassword(db, cfg))
+		u.PATCH("/verify_code_email", ginUser.VerifyCodeEmail(db, jwtPrefix, cfg))
 		u.PATCH("/verify_forgot_password", ginUser.VerifyForgotPassword(db))
-		u.PATCH("/change_password", middle.RequestAuthorize(), ginUser.ChangePassword(db))
+		u.PATCH("/change_password", middle.RequestAuthorize(), ginUser.ChangePassword(db, cfg))
 		u.PATCH("/update_user", middle.RequestAuthorize(), ginUser.UpdateUser(db))
-		u.PATCH("/change_forgot_password", ginUser.ChangeForgotPassword(db))
-		u.POST("/create_verify_code_email", ginUser.CreateVerifyCodeEmail(db))
+		u.PATCH("/change_forgot_password", ginUser.ChangeForgotPassword(db, cfg))
+		u.POST("/create_verify_code_email", ginUser.CreateVerifyCodeEmail(db, cfg))
+		u.DELETE("/deleted_account", ginUser.DeleteAccount(db))
 	}
+	f := r.Group("/follow")
+	{
+		f.POST("/create", middle.RequestAuthorize(), ginFollow.CreateFollow(db))
+		f.POST("/cancel", middle.RequestAuthorize(), ginFollow.CancelFollow(db))
+		f.GET("/list_follower", ginFollow.ListFollower(db))
+		f.GET("/list_following", ginFollow.ListFollowing(db))
+	}
+	rent := r.Group("/rent")
+	{
+		rent.GET("/list_rent", ginRent.ListRent(db))
+	}
+	rent.Use(middle.RequestAuthorize())
+	rent.Use(checkRole.RoleHost())
+	{
+		rent.POST("/create", ginRent.CreateRent(db))
+		rent.DELETE("/deleted", ginRent.DeletedRent(db))
+		rent.PATCH("/update", ginRent.DeletedRent(db))
+	}
+	//c := cron.New(cron.WithSeconds())
+	//
+	//// Job chạy mỗi 10 giây
+	//c.AddFunc("*/10 * * * * *", func() {
+	//	fmt.Println("Hello world -", time.Now().Format("15:04:05"))
+	//})
+	//go c.Start()
 	image := r.Group("/image")
 	{
 		image.POST("/upload", upload.UploadImage(db))
 	}
 	r.Run(":3000") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	//defer c.Stop()
 }
 func setupCors() cors.Config {
 	configCORS := cors.DefaultConfig()

@@ -19,3 +19,10 @@ type Requester interface {
 	GetRole() *model.RoleUser
 	GetEmail() string
 }
+type UserIdCommon struct {
+	UserId int `json:"user_id"`
+}
+type IdCommon struct {
+	UserId int `json:"-"`
+	Id int `json:"id"`
+}

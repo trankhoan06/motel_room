@@ -83,8 +83,8 @@ func ErrUnauthorized(err error) *AppError {
 func ErrCommonDeleted(err error) *AppError {
 	return NewCustomErr(err, "comment haven't this item of this comment has been deleted of no exist", "ERRCOMMENT")
 }
-func ErrUserUpdate(err error) *AppError {
-	return NewCustomErr(err, "no permission", "ERRITEM_USER")
+func ErrUserExist(err error) *AppError {
+	return NewCustomErr(err, "account has been deleted or no exist", "ERRITEM_USER")
 }
 func ErrUneditedUpdate(err error) *AppError {
 	return NewCustomErr(err, "no permission", "ERRITEM_USER")
@@ -94,4 +94,17 @@ func ErrOrder(err error) *AppError {
 }
 func ErrEmailNoExist(err error) *AppError {
 	return NewCustomErr(err, "Email don't exist", "ERREMAIL_USER")
+}
+
+func ErrFollow(err error) *AppError {
+	return NewCustomErr(err, "user has been followed", "ERREMAIL_USER")
+}
+func ErrCancel(err error) *AppError {
+	return NewCustomErr(err, "user don't followed", "ERREMAIL_USER")
+}
+func ErrPermissionRole(err error) *AppError {
+	return NewCustomErr(err, "let register host role", "ERR_ROLE")
+}
+func ErrPermission(err error) *AppError {
+	return NewCustomErr(err, "no permission", "ERR_PERMISSION")
 }

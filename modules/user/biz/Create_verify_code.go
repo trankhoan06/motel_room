@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (biz *UserCommonBiz) NewCreateVerifyCodeEmail(ctx context.Context, verify *model.VerifyAccountCode, expire int) (*model.VerifyToken, error) {
+func (biz *SendEMailBiz) NewCreateVerifyCodeEmail(ctx context.Context, verify *model.VerifyAccountCode, expire int) (*model.VerifyToken, error) {
 	if verify.Email == "" {
 		return nil, common.ErrEmailRequire
 	}
@@ -25,7 +25,7 @@ func (biz *UserCommonBiz) NewCreateVerifyCodeEmail(ctx context.Context, verify *
 	if err := biz.store.CreateCodeVerify(ctx, &verifyEmail); err != nil {
 		return nil, err
 	}
-	emailSend.SendVerifyEmail(user.Email, verifyEmail.Code)
+	emailSend.SendVerifyEmail(user.Email, verifyEmail.Code, biz.cfg)
 	return &model.VerifyToken{
 		Token:   verifyEmail.Token,
 		Email:   verify.Email,

@@ -5,13 +5,14 @@ import (
 	"gorm.io/gorm"
 	"main.go/common"
 	"main.go/component/tokenprovider"
+	"main.go/config"
 	"main.go/modules/user/biz"
 	"main.go/modules/user/model"
 	"main.go/modules/user/storage"
 	"net/http"
 )
 
-func VerifyCodeEmail(db *gorm.DB, provider tokenprovider.TokenProvider) func(*gin.Context) {
+func VerifyCodeEmail(db *gorm.DB, provider tokenprovider.TokenProvider, cfg *config.Config) func(*gin.Context) {
 	return func(c *gin.Context) {
 		var verify model.VerifyAccountCode
 		if err := c.ShouldBindJSON(&verify); err != nil {
@@ -20,7 +21,7 @@ func VerifyCodeEmail(db *gorm.DB, provider tokenprovider.TokenProvider) func(*gi
 		}
 		store := storage.NewSqlModel(db)
 		hash := common.NewSha256Hash()
-		business := biz.NewLoginBiz(store, provider, hash)
+		business := biz.NewLoginBiz(store, provider, hash, cfg)
 		token, err := business.NewVerifyEmail(c.Request.Context(), &verify, 60)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
