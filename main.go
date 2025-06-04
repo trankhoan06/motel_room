@@ -10,6 +10,7 @@ import (
 	"main.go/config"
 	ginFollow "main.go/modules/follower/transport/gin"
 	ginRent "main.go/modules/rent/transport/gin"
+	ginReview "main.go/modules/room_reviews/transport/gin"
 	"main.go/modules/upload"
 	storage2 "main.go/modules/user/storage"
 	ginUser "main.go/modules/user/transport/gin"
@@ -79,6 +80,13 @@ func main() {
 	{
 		image.POST("/upload", upload.UploadImage(db))
 	}
+
+	rate := r.Group("/rate")
+	rate.Use(middle.RequestAuthorize())
+	{
+		rate.POST("/user_review", ginReview.UserReview(db))
+	}
+
 	r.Run(":3000") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	//defer c.Stop()
 }

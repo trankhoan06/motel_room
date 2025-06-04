@@ -7,7 +7,8 @@ import (
 
 func (s *SqlModel) FindRent(ctx context.Context, cond map[string]interface{}) (*model.Rent, error) {
 	var data model.Rent
-	if err := s.db.Table("rent").Where(cond).First(&data).Error; err != nil {
+	db := s.db.Preload("Owner")
+	if err := db.Table("rent").Where(cond).First(&data).Error; err != nil {
 		return nil, err
 	}
 	return &data, nil

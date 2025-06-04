@@ -108,3 +108,9 @@ func ErrPermissionRole(err error) *AppError {
 func ErrPermission(err error) *AppError {
 	return NewCustomErr(err, "no permission", "ERR_PERMISSION")
 }
+func ErrReview(err error) *AppError {
+	return NewCustomErr(err, "you don't have review", "ERR_PERMISSION")
+}
+func ErrNotFoundRent(err error) *AppError {
+	return NewCustomErr(err, "don't found rent", "ERR_PERMISSION")
+}

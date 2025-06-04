@@ -18,6 +18,8 @@ type Rent struct {
 	DepositAmount int               `json:"deposit_amount" gorm:"deposit_amount"`
 	Area          int               `json:"area" gorm:"area"`
 	Locate        string            `json:"locate" gorm:"locate"`
+	AmountRate    int               `json:"amount_rate" gorm:"amount_rate"`
+	Rate          float64           `json:"rate" gorm:"rate"`
 	CreateAt      time.Time         `json:"create_at" gorm:"create_at"`
 	UpdateAt      time.Time         `json:"update_at" gorm:"update_at"`
 }
