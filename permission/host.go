@@ -1,4 +1,4 @@
-package checkRole
+package permission
 
 import (
 	"errors"

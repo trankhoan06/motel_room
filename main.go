@@ -4,7 +4,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"
-	"main.go/checkRole"
 	"main.go/component/middleware"
 	jwt2 "main.go/component/tokenprovider/jwt"
 	"main.go/config"
@@ -14,6 +13,7 @@ import (
 	"main.go/modules/upload"
 	storage2 "main.go/modules/user/storage"
 	ginUser "main.go/modules/user/transport/gin"
+	"main.go/permission"
 	ProviderMysql "main.go/provider/mysql"
 )
 
@@ -63,7 +63,7 @@ func main() {
 		rent.GET("/list_rent", ginRent.ListRent(db))
 	}
 	rent.Use(middle.RequestAuthorize())
-	rent.Use(checkRole.RoleHost())
+	rent.Use(permission.RoleHost())
 	{
 		rent.POST("/create", ginRent.CreateRent(db))
 		rent.DELETE("/deleted", ginRent.DeletedRent(db))
@@ -82,9 +82,15 @@ func main() {
 	}
 
 	rate := r.Group("/rate")
+	{
+		rate.GET("/list_review", ginReview.ListReview(db))
+
+	}
 	rate.Use(middle.RequestAuthorize())
 	{
-		rate.POST("/user_review", ginReview.UserReview(db))
+		rate.POST("/create_review", ginReview.CreateReview(db))
+		rate.PATCH("/update_review", ginReview.UpdateReview(db))
+		rate.DELETE("/deleted_review", ginReview.DeteledReview(db))
 	}
 
 	r.Run(":3000") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")

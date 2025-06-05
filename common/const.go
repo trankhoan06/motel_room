@@ -13,3 +13,15 @@ var (
 	ErrLogin            = errors.New("you need login")
 	ErrEmailRequire     = errors.New("email is require")
 )
+
+type TreeReview struct {
+	Val   interface{}
+	Child *[]TreeReview
+}
+
+func NewTreeReview(val interface{}) *TreeReview {
+	return &TreeReview{
+		Val:   val,
+		Child: &[]TreeReview{},
+	}
+}

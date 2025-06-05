@@ -11,21 +11,24 @@ import (
 	"net/http"
 )
 
-func UserReview(db *gorm.DB) func(*gin.Context) {
+func DeteledReview(db *gorm.DB) func(*gin.Context) {
+
 	return func(c *gin.Context) {
-		var data model.CreateReviews
+		var data model.DeletedReviews
 		if err := c.ShouldBindJSON(&data); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
 			return
 		}
 		data.UserId = c.MustGet(common.Current_user).(common.Requester).GetUserId()
 		store := storage.NewSqlModel(db)
 		storeRent := storageRent.NewSqlModel(db)
 		business := biz.NewUserReviewsCommon(store, storeRent)
-		if err := business.NewUserReview(c.Request.Context(), &data); err != nil {
+		if err := business.NewDeleteReview(c.Request.Context(), &data); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"data": data})
+		c.JSON(200, gin.H{"data": data})
 	}
 }

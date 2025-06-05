@@ -11,6 +11,7 @@ type ReviewBiz interface {
 	UpdateReview(ctx context.Context, data *model.UpdateReviews) error
 	DeletedReview(ctx context.Context, cond map[string]interface{}) error
 	FindReview(ctx context.Context, cond map[string]interface{}) (*model.Reviews, error)
+	ListReview(ctx context.Context, cond map[string]interface{}) (*[]model.Reviews, error)
 }
 type RateRentBiz interface {
 	UpdateRate(ctx context.Context, data *modelRent.RateRent) error

@@ -21,7 +21,7 @@ const (
 )
 
 type User struct {
-	Id              int           `json:"-" gorm:"column:id"`
+	Id              int           `json:"id" gorm:"column:id"`
 	Email           string        `json:"email" gorm:"column:email"`
 	Salt            string        `json:"-" gorm:"column:salt"`
 	Image           *upload.Image `json:"image" gorm:"column:image"`
