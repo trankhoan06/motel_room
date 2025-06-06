@@ -24,6 +24,6 @@ func DeletedRent(db *gorm.DB) func(ctx *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"data": "success"})
+		c.JSON(http.StatusOK, gin.H{"data": "This room will be deleted after 7 days."})
 	}
 }

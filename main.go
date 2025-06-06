@@ -7,6 +7,7 @@ import (
 	"main.go/component/middleware"
 	jwt2 "main.go/component/tokenprovider/jwt"
 	"main.go/config"
+	"main.go/cronjob"
 	ginFollow "main.go/modules/follower/transport/gin"
 	ginRent "main.go/modules/rent/transport/gin"
 	ginReview "main.go/modules/room_reviews/transport/gin"
@@ -61,6 +62,7 @@ func main() {
 	rent := r.Group("/rent")
 	{
 		rent.GET("/list_rent", ginRent.ListRent(db))
+		rent.GET("/list_rent_the_best_amount_review", ginRent.ListRentTheBestAmountReview(db))
 	}
 	rent.Use(middle.RequestAuthorize())
 	rent.Use(permission.RoleHost())
@@ -69,13 +71,6 @@ func main() {
 		rent.DELETE("/deleted", ginRent.DeletedRent(db))
 		rent.PATCH("/update", ginRent.DeletedRent(db))
 	}
-	//c := cron.New(cron.WithSeconds())
-	//
-	//// Job chạy mỗi 10 giây
-	//c.AddFunc("*/10 * * * * *", func() {
-	//	fmt.Println("Hello world -", time.Now().Format("15:04:05"))
-	//})
-	//go c.Start()
 	image := r.Group("/image")
 	{
 		image.POST("/upload", upload.UploadImage(db))
@@ -92,7 +87,8 @@ func main() {
 		rate.PATCH("/update_review", ginReview.UpdateReview(db))
 		rate.DELETE("/deleted_review", ginReview.DeteledReview(db))
 	}
-
+	//cronjob 24h daily
+	cronjob.Cronjob(db)
 	r.Run(":3000") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	//defer c.Stop()
 }

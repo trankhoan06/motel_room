@@ -1,5 +1,0 @@
-package cronjob
-
-func AmountFollow() {
-
-}
