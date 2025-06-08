@@ -3,38 +3,37 @@ package biz
 import (
 	"context"
 	"errors"
-	"fmt"
+	"github.com/hibiken/asynq"
 	"main.go/common"
-	emailSend "main.go/email"
 	"main.go/modules/user/model"
+	"main.go/worker"
 	"time"
 )
 
-func (biz *RegisterUserBiz) NewRegister(ctx context.Context, data *model.Register, expiry int) (*model.VerifyToken, error) {
+func (biz *RegisterUserBiz) NewRegister(ctx context.Context, data *model.Register, expiry int) error {
 
 	if data.Email == "" {
-		return nil, errors.New("email is request")
+		return errors.New("email is request")
 	}
 	if _, err := biz.store.FindUser(ctx, map[string]interface{}{"email": data.Email}); err == nil {
-		return nil, errors.New("user already exists")
+		return errors.New("user already exists")
 	}
 	data.Salt = common.GetSalt(50)
 	data.Password = biz.hash.Hash(data.Salt + data.Password)
 	if err := biz.store.CreateUser(ctx, data); err != nil {
-		return nil, errors.New("error create user")
+		return errors.New("error create user")
 	}
-	var verifyEmail model.CreateVerifyAccount
-	verifyEmail.UserId = data.Id
-	verifyEmail.Code = common.GenerateRandomCode()
-	now := time.Now().Add(-7 * time.Hour)
-	verifyEmail.Expire = now.Add(time.Duration(expiry) * time.Second)
-	if err := biz.store.CreateCodeVerify(ctx, &verifyEmail); err != nil {
-		fmt.Print(err)
+
+	//task
+
+	taskPayload := worker.PayloadSendVerifyEmail{
+		Email: data.Email,
 	}
-	emailSend.SendVerifyEmail(data.Email, verifyEmail.Code, biz.cfg)
-	return &model.VerifyToken{
-		Token:   verifyEmail.Token,
-		Email:   data.Email,
-		IsLogin: true,
-	}, nil
+	opts := []asynq.Option{
+		asynq.MaxRetry(10),
+		asynq.ProcessIn(10 * time.Second),
+		asynq.Queue(worker.QueueSendResetCodePassword),
+	}
+	_ = biz.taskDistributor.DistributeTaskSendVerifyEmail(ctx, &taskPayload, opts...)
+	return nil
 }

@@ -109,8 +109,11 @@ func ErrPermission(err error) *AppError {
 	return NewCustomErr(err, "no permission", "ERR_PERMISSION")
 }
 func ErrReview(err error) *AppError {
-	return NewCustomErr(err, "the review have been deleted or no exist", "ERR_PERMISSION")
+	return NewCustomErr(err, "the review have been deleted or no exist", "ERR_REVIEW")
 }
 func ErrNotFoundRent(err error) *AppError {
-	return NewCustomErr(err, "don't found rent", "ERR_PERMISSION")
+	return NewCustomErr(err, "don't found rent", "ERR_NOTFOUNDRENT")
+}
+func ErrRequire(err error) *AppError {
+	return NewCustomErr(err, "don't leave it blank", "ERR_REQUIRE")
 }

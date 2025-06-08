@@ -3,33 +3,33 @@ package biz
 import (
 	"context"
 	"errors"
+	"github.com/hibiken/asynq"
 	"main.go/common"
-	emailSend "main.go/email"
 	"main.go/modules/user/model"
+	"main.go/worker"
 	"time"
 )
 
-func (biz *SendEMailBiz) NewForgotPassword(ctx context.Context, data *model.ForgotPassword, expire int) (*model.VerifyToken, error) {
+func (biz *RegisterUserBiz) NewForgotPassword(ctx context.Context, data *model.ForgotPassword) error {
 	if data.Email == "" {
-		return nil, common.ErrEmailRequire
+		return common.ErrEmailRequire
 	}
-	user, err := biz.store.FindUser(ctx, map[string]interface{}{"email": data.Email})
+	_, err := biz.store.FindUser(ctx, map[string]interface{}{"email": data.Email})
 	if err != nil {
-		return nil, common.ErrEmailNoExist(errors.New("user don't exist"))
+		return common.ErrEmailNoExist(errors.New("user don't exist"))
 	}
-	var verifyEmail model.CreateVerifyAccount
-	verifyEmail.UserId = user.Id
-	verifyEmail.Token = common.GetSalt(30)
-	verifyEmail.Code = common.GenerateRandomCode()
-	now := time.Now().Add(-7 * time.Hour)
-	verifyEmail.Expire = now.Add(time.Duration(expire) * time.Second)
-	if err1 := biz.store.CreateCodeVerify(ctx, &verifyEmail); err1 != nil {
-		return nil, err1
+
+	//send email
+
+	taskPayload := worker.PayloadSendEmailForgotPassword{
+		Email: data.Email,
 	}
-	emailSend.SendForgotPassword(user.Email, verifyEmail.Code, biz.cfg)
-	return &model.VerifyToken{
-		Token:   verifyEmail.Token,
-		Email:   data.Email,
-		IsLogin: false,
-	}, nil
+	opts := []asynq.Option{
+		asynq.MaxRetry(10),
+		asynq.ProcessIn(10 * time.Second),
+		asynq.Queue(worker.QueueSendResetCodePassword),
+	}
+	_ = biz.taskDistributor.DistributeTaskSendEmailForgotPassword(ctx, &taskPayload, opts...)
+
+	return nil
 }

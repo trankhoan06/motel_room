@@ -2,10 +2,10 @@ package storage
 
 import (
 	"context"
-	"main.go/modules/user/model"
+	"main.go/modules/user_like_room/model"
 )
 
-func (s *SqlModel) CreateCodeVerify(ctx context.Context, data *model.CreateVerifyAccount) error {
+func (s *SqlModel) CreateUserLikeRoom(ctx context.Context, data *model.CreateUserLikeRoom) error {
 	db := s.db.Begin()
 	if err := db.Create(data).Error; err != nil {
 		db.Rollback()

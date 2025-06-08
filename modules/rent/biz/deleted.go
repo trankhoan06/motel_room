@@ -20,5 +20,7 @@ func (biz *RentCommon) NewDeletedRent(ctx context.Context, com *common.IdCommon)
 	if err := biz.store.DeletedRent(ctx, map[string]interface{}{"id": com.Id}); err != nil {
 		return err
 	}
+	// update review
+	//update userlikeroom
 	return nil
 }

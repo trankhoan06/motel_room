@@ -5,14 +5,13 @@ import (
 	"gorm.io/gorm"
 	"main.go/common"
 	"main.go/component/tokenprovider"
-	"main.go/config"
 	"main.go/modules/user/biz"
 	"main.go/modules/user/model"
 	"main.go/modules/user/storage"
 	"net/http"
 )
 
-func Login(db *gorm.DB, provider tokenprovider.TokenProvider, cfg *config.Config) func(*gin.Context) {
+func Login(db *gorm.DB, provider tokenprovider.TokenProvider) func(*gin.Context) {
 	return func(c *gin.Context) {
 		var l model.Login
 		if err := c.ShouldBindJSON(&l); err != nil {
@@ -23,7 +22,7 @@ func Login(db *gorm.DB, provider tokenprovider.TokenProvider, cfg *config.Config
 		}
 		store := storage.NewSqlModel(db)
 		hash := common.NewSha256Hash()
-		business := biz.NewLoginBiz(store, provider, hash, cfg)
+		business := biz.NewLoginBiz(store, provider, hash)
 		token, err := business.NewLogin(c.Request.Context(), &l, 24*30)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{

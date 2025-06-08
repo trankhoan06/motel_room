@@ -2,21 +2,25 @@ package biz
 
 import (
 	"context"
+	"errors"
 	"main.go/common"
 	"main.go/component/tokenprovider"
-	"main.go/modules/user/model"
+	"main.go/modules/email/model"
 	"time"
 )
 
-func (biz *LoginBiz) NewVerifyEmail(ctx context.Context, verify *model.VerifyAccountCode, expire int) (*tokenprovider.Token, error) {
+func (biz LoginBiz) NewVerifyEmail(ctx context.Context, verify *model.VerifyAccountCode, expire int) (*tokenprovider.Token, error) {
 	if verify.Email == "" {
 		return nil, common.ErrEmailRequire
 	}
-	user, err := biz.store.FindUser(ctx, map[string]interface{}{"email": verify.Email})
+	user, err := biz.user.FindUser(ctx, map[string]interface{}{"email": verify.Email})
 	if err != nil {
 		return nil, common.ErrEmailNoExist(err)
 	}
-	v, errVerify := biz.store.FindCodeVerify(ctx, map[string]interface{}{"user_id": user.Id, "token": verify.Token})
+	v, errVerify := biz.store.FindCodeVerify(ctx, map[string]interface{}{"email": user.Email})
+	if v.Verify {
+		return nil, errors.New("code has been verified")
+	}
 	if errVerify != nil {
 		return nil, err
 	}

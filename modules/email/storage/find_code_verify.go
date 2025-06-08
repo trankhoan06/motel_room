@@ -2,7 +2,7 @@ package storage
 
 import (
 	"context"
-	"main.go/modules/user/model"
+	"main.go/modules/email/model"
 )
 
 func (s *SqlModel) FindCodeVerify(ctx context.Context, cond map[string]interface{}) (*model.VerifyAccount, error) {

@@ -1,11 +1,12 @@
-package ginUser
+package ginMail
 
 import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"main.go/modules/user/biz"
-	"main.go/modules/user/model"
-	"main.go/modules/user/storage"
+	"main.go/modules/email/biz"
+	"main.go/modules/email/model"
+	"main.go/modules/email/storage"
+	storageUser "main.go/modules/user/storage"
 	"net/http"
 )
 
@@ -17,7 +18,8 @@ func VerifyForgotPassword(db *gorm.DB) func(*gin.Context) {
 			return
 		}
 		store := storage.NewSqlModel(db)
-		business := biz.NewUserCommonBiz(store)
+		storeUser := storageUser.NewSqlModel(db)
+		business := biz.NewSendEmailBiz(store, storeUser)
 		if err := business.NewVerifyForgotPassword(c.Request.Context(), &data, 60*5); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

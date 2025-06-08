@@ -15,7 +15,7 @@ func (biz *RegisterUserBiz) NewChangePasswordForgot(ctx context.Context, passwor
 	if err != nil {
 		return err
 	}
-	v, errVerify := biz.store.FindCodeVerify(ctx, map[string]interface{}{"user_id": user.Id, "token": password.Token})
+	v, errVerify := biz.email.FindCodeVerify(ctx, map[string]interface{}{"user_id": user.Id, "token": password.Token})
 	if errVerify != nil {
 		return errVerify
 	}
@@ -30,7 +30,7 @@ func (biz *RegisterUserBiz) NewChangePasswordForgot(ctx context.Context, passwor
 	if err := biz.store.ChangePassword(ctx, user.Id, password.NewPassword); err != nil {
 		return err
 	}
-	if err := biz.store.UpdateVerifyCode(ctx, map[string]interface{}{"user_id": user.Id}, map[string]interface{}{"expire": now}); err != nil {
+	if err := biz.email.UpdateVerifyCode(ctx, map[string]interface{}{"user_id": user.Id}, map[string]interface{}{"expire": now}); err != nil {
 		return err
 	}
 

@@ -4,14 +4,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"main.go/common"
-	"main.go/config"
+	StorageEmail "main.go/modules/email/storage"
 	"main.go/modules/user/biz"
 	"main.go/modules/user/model"
 	"main.go/modules/user/storage"
+	"main.go/worker"
 	"net/http"
 )
 
-func ChangePassword(db *gorm.DB, cfg *config.Config) func(*gin.Context) {
+func ChangePassword(db *gorm.DB, taskDistributor worker.TaskDistributor) func(*gin.Context) {
 	return func(c *gin.Context) {
 		var data model.ChangePassword
 		if err := c.ShouldBindJSON(&data); err != nil {
@@ -19,11 +20,12 @@ func ChangePassword(db *gorm.DB, cfg *config.Config) func(*gin.Context) {
 			return
 		}
 		store := storage.NewSqlModel(db)
+		storeEmail := StorageEmail.NewSqlModel(db)
 		hash := common.NewSha256Hash()
 		request := c.MustGet(common.Current_user).(common.Requester)
 		data.Id = request.GetUserId()
 		data.Email = request.GetEmail()
-		business := biz.NewRegisterUserBiz(store, hash, cfg)
+		business := biz.NewRegisterUserBiz(store, hash, storeEmail, taskDistributor)
 		if err := business.NewChangePassword(c.Request.Context(), &data); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
