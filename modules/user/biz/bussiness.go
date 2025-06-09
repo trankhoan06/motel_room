@@ -2,7 +2,9 @@ package biz
 
 import (
 	"context"
+	"main.go/common"
 	"main.go/component/tokenprovider"
+	"main.go/config"
 	modelEmail "main.go/modules/email/model"
 	"main.go/modules/user/model"
 	"main.go/worker"
@@ -27,6 +29,18 @@ type UserCommonBiz struct {
 
 func NewUserCommonBiz(store UserBiz) *UserCommonBiz {
 	return &UserCommonBiz{store: store}
+}
+
+type DeletedRentCase interface {
+	NewDeletedRent(ctx context.Context, com *common.IdCommon) error
+}
+type DeletedUserCommonBiz struct {
+	store UserBiz
+	rent  DeletedRentCase
+}
+
+func NewDeletedUserCommonBiz(store UserBiz, rent DeletedRentCase) *DeletedUserCommonBiz {
+	return &DeletedUserCommonBiz{store: store, rent: rent}
 }
 
 type Hasher interface {
@@ -56,8 +70,9 @@ type LoginBiz struct {
 	store    UserBiz
 	provider tokenprovider.TokenProvider
 	hash     Hasher
+	cfg      *config.Config
 }
 
-func NewLoginBiz(store UserBiz, provider tokenprovider.TokenProvider, hash Hasher) *LoginBiz {
-	return &LoginBiz{store: store, provider: provider, hash: hash}
+func NewLoginBiz(store UserBiz, provider tokenprovider.TokenProvider, hash Hasher, cfg *config.Config) *LoginBiz {
+	return &LoginBiz{store: store, provider: provider, hash: hash, cfg: cfg}
 }

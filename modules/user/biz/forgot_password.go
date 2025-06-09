@@ -28,6 +28,7 @@ func (biz *RegisterUserBiz) NewForgotPassword(ctx context.Context, data *model.F
 		asynq.MaxRetry(10),
 		asynq.ProcessIn(10 * time.Second),
 		asynq.Queue(worker.QueueSendResetCodePassword),
+		asynq.Unique(1 * time.Minute),
 	}
 	_ = biz.taskDistributor.DistributeTaskSendEmailForgotPassword(ctx, &taskPayload, opts...)
 

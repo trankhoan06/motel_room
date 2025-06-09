@@ -11,6 +11,7 @@ type Reviews struct {
 	IsOwner   bool              `json:"is_owner" gorm:"column:is_owner"`
 	Comment   string            `json:"comment" gorm:"column:comment"`
 	Rate      float64           `json:"rate" gorm:"column:rate"`
+	Status    bool              `json:"status" gorm:"column:status"`
 	CreatedAt string            `json:"created_at" gorm:"column:created_at"`
 	UpdatedAt string            `json:"updated_at" gorm:"column:updated_at"` //ON UPDATE CURRENT_TIMESTAMP
 }

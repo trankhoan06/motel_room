@@ -19,6 +19,7 @@ func (biz *RegisterUserBiz) NewRegister(ctx context.Context, data *model.Registe
 		return errors.New("user already exists")
 	}
 	data.Salt = common.GetSalt(50)
+	data.IsEMail = false
 	data.Password = biz.hash.Hash(data.Salt + data.Password)
 	if err := biz.store.CreateUser(ctx, data); err != nil {
 		return errors.New("error create user")

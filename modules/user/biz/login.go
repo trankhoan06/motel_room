@@ -8,7 +8,7 @@ import (
 	"main.go/modules/user/model"
 )
 
-func (biz *LoginBiz) NewLogin(ctx context.Context, data *model.Login, expiry int) (tokenprovider.Token, error) {
+func (biz *LoginBiz) NewLogin(ctx context.Context, data *model.Login, expiry int) (*tokenprovider.Token, error) {
 	if data.Email == "" {
 		return nil, common.ErrEmailRequire
 	}
@@ -34,5 +34,6 @@ func (biz *LoginBiz) NewLogin(ctx context.Context, data *model.Login, expiry int
 	if errToken != nil {
 		return nil, errToken
 	}
-	return token, nil
+
+	return &token, nil
 }

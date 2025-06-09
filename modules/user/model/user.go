@@ -44,15 +44,18 @@ type Login struct {
 	Password string `json:"password" gorm:"column:password"`
 }
 type Register struct {
-	Id       int    `json:"-" gorm:"column:id"`
-	Email    string `json:"email" gorm:"column:email"`
-	Salt     string `json:"-" gorm:"column:salt"`
-	Password string `json:"password" gorm:"column:password"`
-	FistName string `json:"fist_name" gorm:"column:fist_name"`
-	LastName string `json:"last_name" gorm:"column:last_name"`
-	Phone    string `json:"phone" gorm:"column:phone"`
-	Address  string `json:"address" gorm:"column:address"`
+	Id       int           `json:"-" gorm:"column:id"`
+	Email    string        `json:"email" gorm:"column:email"`
+	Salt     string        `json:"-" gorm:"column:salt"`
+	Password string        `json:"password" gorm:"column:password"`
+	FistName string        `json:"fist_name" gorm:"column:fist_name"`
+	LastName string        `json:"last_name" gorm:"column:last_name"`
+	Image    *upload.Image `json:"image" gorm:"column:image"`
+	Phone    string        `json:"phone" gorm:"column:phone"`
+	Address  string        `json:"address" gorm:"column:address"`
+	IsEMail  bool          `json:"-" gorm:"column:is_email"`
 }
+
 type UpdateUser struct {
 	Email    string        `json:"-" gorm:"column:email"`
 	FistName *string       `json:"fist_name" gorm:"column:fist_name"`

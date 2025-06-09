@@ -54,9 +54,9 @@ func main() {
 	u := r.Group("/user")
 	{
 		u.POST("/register", ginUser.Register(db, taskDistributor))
-		u.GET("/login", ginUser.Login(db, jwtPrefix))
+		u.GET("/login", ginUser.Login(db, jwtPrefix, cfg))
 		u.GET("/login_facebook", ginUser.LoginFacebook(db))
-		u.POST("/login_google", ginUser.LoginGoogle(db))
+		u.POST("/login_google", ginUser.LoginGoogle(db, jwtPrefix, cfg))
 		u.GET("/get_profile", middle.RequestAuthorize(), ginUser.GetProfile(db))
 		u.POST("/forgot_password", ginUser.ForgotPassword(db, taskDistributor))
 		u.PATCH("/change_password", middle.RequestAuthorize(), ginUser.ChangePassword(db, taskDistributor))
@@ -130,7 +130,11 @@ func main() {
 			NewEmail,
 			emailCase,
 		)
-		processor.Start()
+		err1 := processor.Start()
+		if err1 != nil {
+			log.Fatal(err1)
+
+		}
 	}()
 	//cronjob 24h daily
 	cronjob.Cronjob(db)

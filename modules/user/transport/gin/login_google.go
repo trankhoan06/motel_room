@@ -2,11 +2,14 @@ package ginUser
 
 import (
 	"github.com/gin-gonic/gin"
-	"google.golang.org/api/idtoken"
 	"gorm.io/gorm"
+	"main.go/common"
+	"main.go/component/tokenprovider"
+	"main.go/config"
+	"main.go/modules/user/biz"
 	"main.go/modules/user/model"
+	"main.go/modules/user/storage"
 	"net/http"
-	"os"
 )
 
 //	func LoginGoogle(db *gorm.DB) func(ctx *gin.Context) {
@@ -71,7 +74,7 @@ import (
 //	}
 //
 // https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email
-func LoginGoogle(db *gorm.DB) func(ctx *gin.Context) {
+func LoginGoogle(db *gorm.DB, provider tokenprovider.TokenProvider, cfg *config.Config) func(ctx *gin.Context) {
 	return func(c *gin.Context) {
 		var data model.LoginMedia
 		// Lấy ID token từ yêu cầu JSON
@@ -79,32 +82,17 @@ func LoginGoogle(db *gorm.DB) func(ctx *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-
-		// Kiểm tra nếu ID token không có trong yêu cầu
-		if data.YourAccessToken == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "ID token is required"})
+		store := storage.NewSqlModel(db)
+		hash := common.NewSha256Hash()
+		business := biz.NewLoginBiz(store, provider, hash, cfg)
+		data1, er := business.NewLoginGoogle(c.Request.Context(), &data, 30*24)
+		if er != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": er.Error()})
 			return
 		}
-
-		// Kiểm tra tính hợp lệ của ID token với Google
-		payload, err := idtoken.Validate(c.Request.Context(), data.YourAccessToken, os.Getenv("CLIENTID")) // "YOUR_CLIENT_ID" là Client ID của ứng dụng
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to validate ID token", "details": err.Error()})
-			return
-		}
-
 		// Trả về thông tin người dùng từ payload
 		c.JSON(http.StatusOK, gin.H{
-			"data": gin.H{
-				"id":             payload.Claims["sub"],            // ID người dùng
-				"email":          payload.Claims["email"],          // Email người dùng
-				"name":           payload.Claims["name"],           // Tên người dùng
-				"given_name":     payload.Claims["given_name"],     // Tên đầu tiên
-				"family_name":    payload.Claims["family_name"],    // Họ người dùng
-				"picture":        payload.Claims["picture"],        // URL ảnh đại diện
-				"locale":         payload.Claims["locale"],         // Ngôn ngữ người dùng
-				"verified_email": payload.Claims["email_verified"], // Kiểm tra email đã xác minh chưa
-			},
+			"data": data1,
 		})
 	}
 }
