@@ -2,7 +2,6 @@ package biz
 
 import (
 	"context"
-	"main.go/common"
 	"main.go/component/tokenprovider"
 	"main.go/config"
 	modelEmail "main.go/modules/email/model"
@@ -14,7 +13,7 @@ type UserBiz interface {
 	UpdateUser(ctx context.Context, data *model.UpdateUser) error
 	FindUser(ctx context.Context, cond map[string]interface{}) (*model.User, error)
 	CreateUser(ctx context.Context, data *model.Register) error
-	DeletedUser(ctx context.Context, cond map[string]interface{}) error
+	ChangeStatusUser(ctx context.Context, cond map[string]interface{}, status *model.StatusUser) error
 	//UpdateVerifyEmail(ctx context.Context, cond map[string]interface{}) error
 	ChangePassword(ctx context.Context, id int, password string) error
 }
@@ -29,18 +28,6 @@ type UserCommonBiz struct {
 
 func NewUserCommonBiz(store UserBiz) *UserCommonBiz {
 	return &UserCommonBiz{store: store}
-}
-
-type DeletedRentCase interface {
-	NewDeletedRent(ctx context.Context, com *common.IdCommon) error
-}
-type DeletedUserCommonBiz struct {
-	store UserBiz
-	rent  DeletedRentCase
-}
-
-func NewDeletedUserCommonBiz(store UserBiz, rent DeletedRentCase) *DeletedUserCommonBiz {
-	return &DeletedUserCommonBiz{store: store, rent: rent}
 }
 
 type Hasher interface {

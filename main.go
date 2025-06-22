@@ -17,6 +17,7 @@ import (
 	ginFollow "main.go/modules/follower/transport/gin"
 	ginRent "main.go/modules/rent/transport/gin"
 	ginReview "main.go/modules/room_reviews/transport/gin"
+	ginSearch "main.go/modules/search/transport/gin"
 	"main.go/modules/upload"
 	storageUser "main.go/modules/user/storage"
 	ginUser "main.go/modules/user/transport/gin"
@@ -61,7 +62,7 @@ func main() {
 		u.POST("/forgot_password", ginUser.ForgotPassword(db, taskDistributor))
 		u.PATCH("/change_password", middle.RequestAuthorize(), ginUser.ChangePassword(db, taskDistributor))
 		u.PATCH("/update_user", middle.RequestAuthorize(), ginUser.UpdateUser(db))
-		u.DELETE("/deleted_account", ginUser.DeleteAccount(db))
+		u.DELETE("/deleted_account", ginUser.ChangeStatusAccount(db))
 		u.PATCH("/change_forgot_password", ginUser.ChangeForgotPassword(db, taskDistributor))
 	}
 	mail := r.Group("/mail")
@@ -114,6 +115,19 @@ func main() {
 		like.DELETE("/deleted", ginUserLikeRoom.DeletedUserLikeRoom(db))
 		like.GET("/list", ginUserLikeRoom.ListUserLikeRoom(db))
 	}
+	search := r.Group("/search")
+	{
+		search.GET("/search_rent", ginSearch.SearchRent(db))
+		search.GET("/list_search_custom", ginSearch.ListSearchCustom(db))
+
+	}
+	search.Use(middle.RequestAuthorize())
+	{
+		search.GET("/list_search", ginSearch.ListSearch(db))
+		search.POST("/create", ginSearch.CreateSearch(db))
+		search.DELETE("/deleted", ginSearch.DeletedSearch(db))
+	}
+
 	//task
 	accountSto := storageUser.NewSqlModel(db)
 	emailSto := StorageEmail.NewSqlModel(db)

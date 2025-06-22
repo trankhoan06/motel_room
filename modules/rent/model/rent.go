@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+type TypeRoom int
+
+const (
+	TypeApartment TypeRoom = iota
+	TypeMotelRoom
+	TypePrivateHouse
+)
+
 type StatusRent int
 
 const (
@@ -20,11 +28,12 @@ type Rent struct {
 	Title         string            `json:"title" gorm:"title"`
 	Description   string            `json:"description" gorm:"description"`
 	Image         *upload.Image     `json:"image" gorm:"image"`
-	RoomType      int               `json:"room_type" gorm:"room_type"`
+	RoomType      *TypeRoom         `json:"room_type" gorm:"room_type"`
 	Price         int               `json:"price" gorm:"price"`
 	DepositAmount int               `json:"deposit_amount" gorm:"deposit_amount"`
 	Area          int               `json:"area" gorm:"area"`
 	Locate        string            `json:"locate" gorm:"locate"`
+	Province      string            `json:"province" gorm:"province"`
 	AmountRate    int               `json:"amount_rate" gorm:"amount_rate"`
 	Rate          float64           `json:"rate" gorm:"rate"`
 	Status        *StatusRent       `json:"status" gorm:"status"`
@@ -36,11 +45,12 @@ type CreateRent struct {
 	Title         string        `json:"title" gorm:"title"`
 	Description   string        `json:"description" gorm:"description"`
 	Image         *upload.Image `json:"image" gorm:"image"`
-	RoomType      int           `json:"room_type" gorm:"room_type"`
+	RoomType      *TypeRoom     `json:"room_type" gorm:"room_type"`
 	Price         int           `json:"price" gorm:"price"`
 	DepositAmount int           `json:"deposit_amount" gorm:"deposit_amount"`
 	Area          int           `json:"area" gorm:"area"`
 	Locate        string        `json:"locate" gorm:"locate"`
+	Province      string        `json:"province" gorm:"province"`
 }
 type UpdateRent struct {
 	Id            int           `json:"id" gorm:"id"`
@@ -48,7 +58,7 @@ type UpdateRent struct {
 	Title         *string       `json:"title" gorm:"title"`
 	Description   *string       `json:"description" gorm:"description"`
 	Image         *upload.Image `json:"image" gorm:"image"`
-	RoomType      *int          `json:"room_type" gorm:"room_type"`
+	RoomType      *TypeRoom     `json:"room_type" gorm:"room_type"`
 	Price         *int          `json:"price" gorm:"price"`
 	DepositAmount *int          `json:"deposit_amount" gorm:"deposit_amount"`
 	Area          *int          `json:"area" gorm:"area"`
@@ -61,7 +71,7 @@ type SimpleRent struct {
 	Title         string            `json:"title" gorm:"title"`
 	Description   string            `json:"description" gorm:"description"`
 	Image         *upload.Image     `json:"image" gorm:"image"`
-	RoomType      int               `json:"room_type" gorm:"room_type"`
+	RoomType      *TypeRoom         `json:"room_type" gorm:"room_type"`
 	Price         int               `json:"price" gorm:"price"`
 	DepositAmount int               `json:"deposit_amount" gorm:"deposit_amount"`
 	Area          int               `json:"area" gorm:"area"`

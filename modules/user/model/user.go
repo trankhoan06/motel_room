@@ -81,7 +81,9 @@ type NewPasswordForgot struct {
 type LoginMedia struct {
 	YourAccessToken string `json:"your_access_token" gorm:"column:your_access_token"`
 }
-
+type StatusUserValue struct {
+	Status *StatusUser `json:"status" gorm:"column:status"`
+}
 type SimpleUser struct {
 	Id       int           `json:"-" gorm:"column:id"`
 	Image    *upload.Image `json:"image" gorm:"column:image"`
