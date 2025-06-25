@@ -26,10 +26,8 @@ type CreateVerifyAccount struct {
 	Expire time.Time `json:"expire" gorm:"expire"`
 }
 type VerifyAccountCode struct {
-	Email    string `json:"email" gorm:"email"`
-	Code     int    `json:"code" gorm:"code"`
-	IsForgot bool   `json:"is_forgot" gorm:"is_forgot"`
-	IsEmail  bool   `json:"is_email" gorm:"is_email"`
+	Email string `json:"email" gorm:"email"`
+	Code  int    `json:"code" gorm:"code"`
 }
 
 func (CreateVerifyAccount) TableName() string { return "send_code" }

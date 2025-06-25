@@ -24,7 +24,7 @@ func CreateUserLikeRoom(db *gorm.DB) func(*gin.Context) {
 		storeRent := storageRent.NewSqlModel(db)
 		business := biz.NewUserLikeRoomCommon(store, storeRent)
 		if err := business.NewCreateUserLikeRoom(ctx.Request.Context(), &data); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		ctx.JSON(http.StatusOK, gin.H{"data": "success"})

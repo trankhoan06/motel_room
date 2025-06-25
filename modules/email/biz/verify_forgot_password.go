@@ -16,12 +16,12 @@ func (biz SendEMailBiz) NewVerifyForgotPassword(ctx context.Context, password *m
 	if err != nil {
 		return err
 	}
-	v, errVerify := biz.store.FindCodeVerify(ctx, map[string]interface{}{"email": user.Email})
-	if v.Verify {
-		return errors.New("code has been verified")
-	}
+	v, errVerify := biz.store.FindCodeVerify(ctx, map[string]interface{}{"email": user.Email, "type": int(model.TypeForgotPassword)})
 	if errVerify != nil {
 		return errVerify
+	}
+	if v.Verify {
+		return errors.New("code has been verified")
 	}
 	if v.Code != password.Code {
 		return common.ErrVerifyCode

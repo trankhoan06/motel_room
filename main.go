@@ -14,7 +14,11 @@ import (
 	"main.go/modules/email/biz"
 	StorageEmail "main.go/modules/email/storage"
 	ginMail "main.go/modules/email/transport/gin"
+	storageFollow "main.go/modules/follower/storage"
 	ginFollow "main.go/modules/follower/transport/gin"
+	storageMappingNotify "main.go/modules/mapping_notify/storage"
+	ginMappingNotify "main.go/modules/mapping_notify/transport/gin"
+	ginNotify "main.go/modules/notify/transport/gin"
 	ginRent "main.go/modules/rent/transport/gin"
 	ginReview "main.go/modules/room_reviews/transport/gin"
 	ginSearch "main.go/modules/search/transport/gin"
@@ -109,11 +113,13 @@ func main() {
 	}
 
 	like := r.Group("/like")
+	{
+		like.GET("/list", ginUserLikeRoom.ListUserLikeRoom(db))
+	}
 	like.Use(middle.RequestAuthorize())
 	{
 		like.POST("/create", ginUserLikeRoom.CreateUserLikeRoom(db))
 		like.DELETE("/deleted", ginUserLikeRoom.DeletedUserLikeRoom(db))
-		like.GET("/list", ginUserLikeRoom.ListUserLikeRoom(db))
 	}
 	search := r.Group("/search")
 	{
@@ -128,9 +134,20 @@ func main() {
 		search.DELETE("/deleted", ginSearch.DeletedSearch(db))
 	}
 
+	notify := r.Group("/notify")
+	notify.Use(middle.RequestAuthorize())
+	{
+		notify.POST("/create", ginNotify.CreateNotify(db, taskDistributor))
+		notify.DELETE("/deleted", ginNotify.DeletedNotify(db))
+		notify.PATCH("/deleted", ginNotify.UpdateNotify(db))
+		notify.GET("list_all_notify", ginMappingNotify.GetAllNotifyByUser(db))
+	}
+
 	//task
 	accountSto := storageUser.NewSqlModel(db)
 	emailSto := StorageEmail.NewSqlModel(db)
+	followSto := storageFollow.NewSql(db)
+	mappingSto := storageMappingNotify.NewSqlModel(db)
 	emailCase := biz.NewSendEmailBiz(emailSto, accountSto)
 	NewEmail := emailSend.NewGmailSender(cfg.Email.EmailSenderName, cfg.Email.EmailSenderAddress, cfg.Email.EmailSenderPassword)
 
@@ -143,6 +160,8 @@ func main() {
 			accountSto,
 			NewEmail,
 			emailCase,
+			followSto,
+			mappingSto,
 		)
 		err1 := processor.Start()
 		if err1 != nil {

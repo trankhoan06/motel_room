@@ -1,3 +1,4 @@
 .yaml
 /static/
+/constant/
 config/config.yaml

@@ -53,6 +53,6 @@ type LoginBiz struct {
 	hash     Hasher
 }
 
-func NewLoginBiz(store EmailBiz, provider tokenprovider.TokenProvider, hash Hasher) *LoginBiz {
-	return &LoginBiz{store: store, provider: provider, hash: hash}
+func NewLoginBiz(store EmailBiz, user UserEmailBiz, provider tokenprovider.TokenProvider, hash Hasher) *LoginBiz {
+	return &LoginBiz{store: store, user: user, provider: provider, hash: hash}
 }

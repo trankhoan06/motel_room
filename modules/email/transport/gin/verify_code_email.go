@@ -8,6 +8,7 @@ import (
 	"main.go/modules/email/biz"
 	"main.go/modules/email/model"
 	"main.go/modules/email/storage"
+	storageUser "main.go/modules/user/storage"
 	"net/http"
 )
 
@@ -19,8 +20,9 @@ func VerifyCodeEmail(db *gorm.DB, provider tokenprovider.TokenProvider) func(*gi
 			return
 		}
 		store := storage.NewSqlModel(db)
+		storeUser := storageUser.NewSqlModel(db)
 		hash := common.NewSha256Hash()
-		business := biz.NewLoginBiz(store, provider, hash)
+		business := biz.NewLoginBiz(store, storeUser, provider, hash)
 		token, err := business.NewVerifyEmail(c.Request.Context(), &verify, 60)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

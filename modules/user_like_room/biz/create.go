@@ -11,8 +11,8 @@ func (biz *UserLikeRoomCommon) NewCreateUserLikeRoom(ctx context.Context, data *
 	if data.RentId == 0 {
 		return common.ErrRequire(errors.New("rent id is require"))
 	}
-	if _, err := biz.userLikeRoom.FindUserLikeRoom(ctx, map[string]interface{}{"user_id": data.UserId, "rent_id": data.RentId}); err != nil {
-		return err
+	if _, err := biz.userLikeRoom.FindUserLikeRoom(ctx, map[string]interface{}{"user_id": data.UserId, "rent_id": data.RentId}); err == nil {
+		return errors.New("user has been liked rent")
 	}
 	_, err := biz.rent.FindRent(ctx, map[string]interface{}{"id": data.RentId})
 	if err != nil {

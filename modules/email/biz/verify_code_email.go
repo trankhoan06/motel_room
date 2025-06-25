@@ -17,7 +17,7 @@ func (biz LoginBiz) NewVerifyEmail(ctx context.Context, verify *model.VerifyAcco
 	if err != nil {
 		return nil, common.ErrEmailNoExist(err)
 	}
-	v, errVerify := biz.store.FindCodeVerify(ctx, map[string]interface{}{"email": user.Email})
+	v, errVerify := biz.store.FindCodeVerify(ctx, map[string]interface{}{"email": user.Email, "type": int(model.TypeVerifyEmail)})
 	if v.Verify {
 		return nil, errors.New("code has been verified")
 	}
@@ -31,7 +31,7 @@ func (biz LoginBiz) NewVerifyEmail(ctx context.Context, verify *model.VerifyAcco
 	if v.Code != verify.Code {
 		return nil, common.ErrVerifyCode
 	}
-	if err := biz.store.UpdateVerifyCode(ctx, map[string]interface{}{"user_id": user.Id}, map[string]interface{}{"verify": 1}); err != nil {
+	if err := biz.store.UpdateVerifyCode(ctx, map[string]interface{}{"id": user.Id}, map[string]interface{}{"verify": 1}); err != nil {
 		return nil, err
 	}
 	if err := biz.store.UpdateVerifyEmail(ctx, map[string]interface{}{"id": user.Id}); err != nil {

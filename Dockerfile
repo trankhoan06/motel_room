@@ -22,7 +22,7 @@ COPY --from=builder /app/go-motel-room .
 #copy config
 COPY config/config.yaml ./config/
 #copy migrations
-COPY migrations migrations
+#COPY migrations migrations
 
 #copy images
 COPY static static

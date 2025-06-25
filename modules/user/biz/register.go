@@ -33,7 +33,7 @@ func (biz *RegisterUserBiz) NewRegister(ctx context.Context, data *model.Registe
 	opts := []asynq.Option{
 		asynq.MaxRetry(10),
 		asynq.ProcessIn(10 * time.Second),
-		asynq.Queue(worker.QueueSendResetCodePassword),
+		asynq.Queue(worker.QueueSendVerifyEmail),
 	}
 	_ = biz.taskDistributor.DistributeTaskSendVerifyEmail(ctx, &taskPayload, opts...)
 	return nil

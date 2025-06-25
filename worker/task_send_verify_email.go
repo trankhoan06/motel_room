@@ -3,13 +3,16 @@ package worker
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
+	"main.go/constant"
 	modelEmail "main.go/modules/email/model"
 )
 
 const TaskSendVerifyEmail = "task:verify_email"
+const UrlVerifyEmail = constant.URL_HOST_EC2 + "/verify_email"
 
 type PayloadSendVerifyEmail struct {
 	Email string `json:"email"`
@@ -24,29 +27,39 @@ func (dis *RedisTaskDistributor) DistributeTaskSendVerifyEmail(
 	if err != nil {
 		return err
 	}
-	task := asynq.NewTask(TaskForgotPassword, jsonPayload, otps...)
-	info, err := dis.Client.EnqueueContext(ctx, task)
-	if err != nil {
-		return err
+	task := asynq.NewTask(TaskSendVerifyEmail, jsonPayload, otps...)
+	info, err1 := dis.Client.EnqueueContext(ctx, task)
+	if err1 != nil {
+		fmt.Println("error here")
+		return fmt.Errorf("error when enqueue task: %v", err1)
 	}
 	log.Info().Str("type", task.Type()).Bytes("payload", task.Payload()).
 		Str("queue", info.Queue).Int("max_retry", info.MaxRetry).Msg("enqueued task")
 	return nil
 }
 func (pro *RedisTaskProcessor) TaskProcessSendVerifyEmail(ctx context.Context, task *asynq.Task) error {
+	log.Info().Msg("📩 Đang xử lý task gửi verify email")
 	var payload PayloadSendVerifyEmail
 	if err := json.Unmarshal(task.Payload(), &payload); err != nil {
+		fmt.Println("error here 1")
 		return err
+	}
+	if pro.accountCase == nil || pro.accountStorage == nil {
+		fmt.Println("error here 3.5")
+		return errors.New("account storage is nil")
 	}
 	_, err := pro.accountStorage.FindUser(ctx, map[string]interface{}{"email": payload.Email})
 	if err != nil {
+		fmt.Println("error here 2", payload.Email, err.Error())
 		return fmt.Errorf("error user: %w", err)
 	}
 	verify, err := pro.accountCase.NewCreateVerifyCodeEmail(ctx, payload.Email, 5*60)
 	if err != nil {
+		fmt.Println("error here 3", err)
 		return err
 	}
 	if err := SendMailToVerifyEmail(pro, verify); err != nil {
+		fmt.Println("error here 4", err)
 		return fmt.Errorf("error when send verify email: %w", err)
 	}
 
@@ -58,8 +71,8 @@ func (pro *RedisTaskProcessor) TaskProcessSendVerifyEmail(ctx context.Context, t
 }
 func SendMailToVerifyEmail(processor *RedisTaskProcessor, verifyEmail *modelEmail.CreateVerifyAccount) error {
 	subject := "Welcome to Motel Room"
-	verifyUrl := fmt.Sprintf("email=%s&secret_code=%s",
-		verifyEmail.Email, verifyEmail.Code)
+	verifyUrl := fmt.Sprintf("%s?email=%s&secret_code=%s",
+		UrlVerifyEmail, verifyEmail.Email, verifyEmail.Code)
 	content := fmt.Sprintf(`
 <!DOCTYPE html>
 <html>
@@ -229,7 +242,7 @@ func SendMailToVerifyEmail(processor *RedisTaskProcessor, verifyEmail *modelEmai
           <!-- start copy -->
           <tr>
             <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;">
-              <p style="margin: 0;">Tap the button below to confirm your email address. If you didn't create an account with <a href="#">iTask</a>, you can safely delete this email.</p>
+              <p style="margin: 0;">Tap the button below to confirm your email address. If you didn't create an account with <a href="#">Motel Room</a>, you can safely delete this email.</p>
             </td>
           </tr>
           <!-- end copy -->
@@ -257,7 +270,7 @@ func SendMailToVerifyEmail(processor *RedisTaskProcessor, verifyEmail *modelEmai
           <!-- start copy -->
           <tr>
             <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; border-bottom: 3px solid #d4dadf">
-              <p style="margin: 0;">Cheers,<br> iTask</p>
+              <p style="margin: 0;">Cheers,<br> Motel Room</p>
             </td>
           </tr>
           <!-- end copy -->
