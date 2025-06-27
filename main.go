@@ -137,10 +137,12 @@ func main() {
 	notify := r.Group("/notify")
 	notify.Use(middle.RequestAuthorize())
 	{
-		notify.POST("/create", ginNotify.CreateNotify(db, taskDistributor))
-		notify.DELETE("/deleted", ginNotify.DeletedNotify(db))
-		notify.PATCH("/deleted", ginNotify.UpdateNotify(db))
 		notify.GET("list_all_notify", ginMappingNotify.GetAllNotifyByUser(db))
+		notify.POST("/create", ginNotify.CreateNotify(db, taskDistributor))
+		notify.PATCH("/update", ginNotify.UpdateNotify(db))
+		notify.PATCH("update_read", ginMappingNotify.UpdateRead(db))
+		notify.DELETE("/deleted", ginNotify.DeletedNotify(db))
+		notify.DELETE("deleted_mapping", ginMappingNotify.DeletedMappingNotify(db))
 	}
 
 	//task
